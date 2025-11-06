@@ -7,6 +7,7 @@ router.get("/getassignedproperties", assigned.getAssignedProperties);
 
 // ✅ Get assignment by id
 router.get("/getassignedproperties/:id", assigned.getAssignedPropertyById);
+router.get("/getAssignedPropertyByClientId/:id", assigned.getAssignedPropertyByClientId);
 
 // ✅ Add assignment
 router.post("/addassignedproperty", assigned.addAssignedProperty);

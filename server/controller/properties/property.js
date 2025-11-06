@@ -60,13 +60,18 @@ const updateProperty = (req, res) => {
 // delete property
 const deleteProperty = (req, res) => {
   const { id } = req.params;
-const q = "DELETE FROM properties WHERE id = ? AND status = 'available'";
+  const q = "DELETE FROM properties WHERE id = ? AND status = 'available'";
   connection.query(q, [id], (err, result) => {
     if (err) return res.status(500).json({ error: "database error" });
     if (result.affectedRows === 0) return res.status(404).json({ error: "not found" });
     return res.status(200).json({ message: "deleted" });
   });
 };
+
+const getPropertiesByClientId = (req, res) => {
+  const { id } = req.params;
+  const query = "SELECT * FROM properties WHERE "
+}
 
 module.exports = {
   getProperties,

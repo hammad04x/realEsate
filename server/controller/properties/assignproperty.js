@@ -19,6 +19,15 @@ const getAssignedPropertyById = (req, res) => {
     return res.status(200).json(data[0]);
   });
 };
+const getAssignedPropertyByClientId = (req, res) => {
+  const { id } = req.params;
+  const q = "SELECT * FROM assigned_properties WHERE client_id = ?";
+  connection.query(q, [id], (err, data) => {
+    if (err) return res.status(500).json({ error: "database error" });
+    if (!data || data.length === 0) return res.status(404).json({ error: "not found" });
+    return res.status(200).json(data);
+  });
+};
 
 // ✅ Add new assignment
 const addAssignedProperty = (req, res) => {
@@ -82,6 +91,7 @@ const deleteAssignedProperty = (req, res) => {
 module.exports = {
   getAssignedProperties,
   getAssignedPropertyById,
+  getAssignedPropertyByClientId,
   addAssignedProperty,
   updateAssignedProperty,
   deleteAssignedProperty,
