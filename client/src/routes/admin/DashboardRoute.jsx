@@ -15,6 +15,10 @@ import UpdateProperty from "../../pages/admin/properties/UpdateProperty";
 import AddProperty from "../../pages/admin/properties/AddProperty";
 import Properties from "../../pages/admin/properties/Property";
 import ViewAdmin from "../../pages/admin/manage_admin/ViewAdmin";
+import AssignedProperty from "../../pages/admin/properties/AssignProperties";
+import AddAssignment from "../../pages/admin/properties/AddAssignedProperties";
+import UpdateAssignment from "../../pages/admin/properties/UpdateAssignedProperties";
+import GetProperties from "../../pages/admin/properties/Property";
 
 const AppRoutes = () => {
 
@@ -39,8 +43,12 @@ const AppRoutes = () => {
         <Route path="edit-admin/:id" element={<EditAdmin />} />
         <Route path="view-admin/:id" element={<ViewAdmin />} />
         <Route path='property' element={<Properties />} />
+        <Route path='property' element={<GetProperties />} />
         <Route path='addproperty' element={<AddProperty />} />
         <Route path='updateproperty' element={<UpdateProperty />} />
+        <Route path='propertyassigned' element={<AssignedProperty />} />
+        <Route path='addpropertyassigned' element={<AddAssignment />} />
+        <Route path='updatepropertyassigned' element={<UpdateAssignment />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin/login" replace />} />
     </Routes>
