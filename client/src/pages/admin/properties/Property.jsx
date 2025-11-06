@@ -29,8 +29,24 @@ const GetProperties = () => {
     }
   };
 
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get("http://localhost:4500/getassignedproperties");
+      setAssignments(res.data || []);
+    } catch (err) {
+      console.error("fetchAssignments error", err);
+      // do not alert here, assignments are optional for UI overlay
+    }
+  };
+
+  // unified refresh that fetches both lists
+  const refreshAll = async () => {
+    await Promise.all([fetchProperties(), fetchAssignments()]);
+  };
+
   useEffect(() => {
-    fetchProperties();
+    refreshAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // responsive listener

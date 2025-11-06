@@ -12,6 +12,7 @@ const Sidebar = ({ admin, onLogout, isMobile, isTablet, isSidebarOpen, toggleSid
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       onLogout();
+      localStorage.clear()
     }
   };
 
@@ -160,6 +161,21 @@ const Sidebar = ({ admin, onLogout, isMobile, isTablet, isSidebarOpen, toggleSid
             </li>
           </ul>
         </nav>
+          )}
+          <li>
+            <NavLink to="/admin/property">
+              <RiAdminLine />
+              Properties
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/admin/propertyassigned">
+              <RiAdminLine />
+              Propertyasigned
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
 
         <div className="menu-content">
           <h6>OTHERS</h6>

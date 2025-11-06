@@ -40,11 +40,13 @@ const AddProperty = () => {
 
   // handle file input
   const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setForm((prev) => ({ ...prev, [name]: files[0] }));
+    const file = e.target.files[0];
+    if (file) {
+      setForm((prev) => ({ ...prev, image: file }));
+      setImgPreview(URL.createObjectURL(file));
+    }
   };
 
-  // submit property
   const handleSubmit = async () => {
     try {
       // Basic validation
@@ -65,7 +67,7 @@ const AddProperty = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Property added successfully");
+      alert("Property added successfully ✅");
       navigate("/admin/property");
     } catch (err) {
       console.error("Add error:", err);
@@ -96,21 +98,28 @@ const AddProperty = () => {
           </div>
 
           <div className="admin-panel-header-add-buttons">
-            <NavLink to="/admin/property" className="cancel-btn dashboard-add-product-btn">
+            <NavLink
+              to="/admin/property"
+              className="cancel-btn dashboard-add-product-btn"
+            >
               <HiXMark /> Cancel
             </NavLink>
 
-            <button onClick={handleSubmit} className="primary-btn dashboard-add-product-btn">
+            <button
+              onClick={handleSubmit}
+              className="primary-btn dashboard-add-product-btn"
+            >
               <MdSave /> Save Property
             </button>
           </div>
         </div>
 
-        {/* ===== FORM CARD ===== */}
+        {/* ===== FORM SECTION ===== */}
         <div className="dashboard-add-content-card-div">
+          {/* ===== LEFT SIDE (Form fields) ===== */}
           <div className="dashboard-add-content-left-side">
             <div className="dashboard-add-content-card">
-              <h6>Property Information</h6>
+              <h6>Property Details</h6>
 
               <div className="add-product-form-container">
                 <div className="coupon-code-input-profile">
@@ -165,7 +174,11 @@ const AddProperty = () => {
 
                   <div>
                     <label>Status</label>
-                    <select name="status" value={form.status} onChange={handleChange}>
+                    <select
+                      name="status"
+                      value={form.status}
+                      onChange={handleChange}
+                    >
                       <option value="available">Available</option>
                       <option value="reserved">Reserved</option>
                       <option value="sold">Sold</option>
@@ -207,7 +220,7 @@ const AddProperty = () => {
                   />
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </main>
