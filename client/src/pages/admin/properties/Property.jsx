@@ -79,7 +79,7 @@ const GetProperties = () => {
 
   return (
     <>
-      <Sidebar />
+      {/* <Sidebar /> */}
       <Navbar />
 
       <main className="admin-panel-header-div">
@@ -198,3 +198,4 @@ const GetProperties = () => {
 };
 
 export default GetProperties;
+
