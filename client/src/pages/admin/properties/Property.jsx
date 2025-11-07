@@ -44,8 +44,7 @@ const GetProperties = () => {
   };
 
   useEffect(() => {
-    refreshAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchProperties();
   }, []);
 
   // responsive listener
