@@ -1,21 +1,16 @@
-/* =============================================
-   VIEW ADMIN – MODERN & COLORFUL DESIGN
-   File: assets/css/admin/viewAdmin.css
-   Works with your existing ViewAdmin.jsx
-   ============================================= */
-
 * {
   font-family: "Inter", sans-serif;
 }
 
-/* ====================== LAYOUT ====================== */
+/* ====================== ROOT LAYOUT ====================== */
 .client-section {
-  padding: 28px;
-  background: #f8fafc;
+  /* padding: 28px; */
+  background: #f5f5f7;
   min-height: 100vh;
   color: #1e293b;
 }
 
+/* Header */
 .client-header {
   display: flex;
   justify-content: space-between;
@@ -36,7 +31,8 @@
 
 /* ====================== SIDEBAR ====================== */
 .client-sidebar {
-  width: 300px;
+  width: 400px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -77,14 +73,25 @@
   margin: 8px 0;
   font-size: 15px;
   color: #475569;
+  word-break: break-all;          /* <-- NEW */
+  overflow-wrap: anywhere;        /* <-- NEW */
 }
 
+/* keep the icon size consistent */
 .client-contact-row svg {
+  flex-shrink: 0;                 /* <-- NEW */
   color: #4f6ef7;
   font-size: 18px;
 }
 
-/* Associated Properties List */
+/* optional – a tiny helper for very long text */
+.client-contact-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Property List */
 .client-property-list {
   list-style: none;
   padding: 0;
@@ -281,7 +288,8 @@
 
 /* ====================== BUTTONS ====================== */
 .client-add-sale-btn,
-.client-add-payment-btn {
+.client-add-payment-btn,
+.client-mark-paid-btn {
   background: linear-gradient(135deg, #4f6ef7, #3b82f6);
   color: white;
   border: none;
@@ -289,11 +297,20 @@
   border-radius: 10px;
   font-weight: 600;
   font-size: 14px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   transition: all 0.2s;
+  cursor: pointer;
+}
+
+.client-mark-paid-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .client-add-sale-btn:hover,
@@ -303,22 +320,36 @@
   background: linear-gradient(135deg, #3b82f6, #2563eb);
 }
 
+.client-mark-paid-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
 .payment-cancel {
   background: #e2e8f0;
   color: #475569;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   border: none;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-cancel:hover {
+  background: #cbd5e1;
 }
 
 .payment-save {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   border: none;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .payment-save:hover {
@@ -350,6 +381,7 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
 }
 
 .better-modal {
@@ -406,6 +438,7 @@ select {
   margin: 10px 0 16px 0;
   font-size: 15px;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .payment-input:focus,
@@ -428,6 +461,14 @@ select:focus {
   font-family: inherit;
 }
 
+label {
+  display: block;
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
 /* ====================== SIGNATURE ====================== */
 .signature-pad {
   width: 100%;
@@ -446,6 +487,12 @@ select:focus {
   border: none;
   font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signature-clear-btn:hover {
+  background: #dc2626;
 }
 
 /* ====================== ACTIONS ====================== */
@@ -467,46 +514,291 @@ select:focus {
   background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
 }
 
-/* ====================== RESPONSIVE ====================== */
-@media (max-width: 768px) {
-  .client-layout {
-    flex-direction: column;
-  }
-  .client-sidebar {
-    width: 100%;
-  }
+/* ====================== ENHANCED RESPONSIVE DESIGN ====================== */
+
+/* ---------- MOBILE FIRST (≤640px) – STACK EVERYTHING ---------- */
+@media (max-width: 640px) {
+  /* .client-section {
+    padding: 16px;
+  } */
+
   .client-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 12px;
+    margin-bottom: 16px;
   }
+
+  .client-title {
+    font-size: 22px;
+  }
+
   .client-add-sale-btn {
     width: 100%;
     justify-content: center;
   }
-  .payment-modal {
-    width: 95% !important;
-    padding: 20px;
+
+  /* SIDEBAR VISIBLE ON MOBILE - STACKS ON TOP */
+  .client-layout {
+    flex-direction: column;
+    gap: 16px;
   }
+
+  .client-sidebar {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .client-card {
+    padding: 16px;
+  }
+
+  .client-name {
+    font-size: 20px;
+  }
+
+  .client-contact-row {
+    font-size: 14px;
+  }
+
+  /* Main content */
+  .client-sale-box {
+    padding: 16px;
+  }
+
+  .client-box-title {
+    font-size: 18px;
+  }
+
+  .client-property-sale {
+    padding: 14px;
+  }
+
   .client-property-header {
     flex-direction: column;
     gap: 6px;
   }
+
+  .client-property-name {
+    font-size: 16px;
+  }
+
   .client-sale-price {
     font-size: 18px;
   }
+
+  /* Transaction box improvements */
+  .client-transaction-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .client-transaction-header h5 {
+    font-size: 15px;
+  }
+
+  .client-add-payment-btn {
+    width: 100%;
+  }
+
+  /* TABLE - Card style on mobile */
+  .client-table {
+    font-size: 13px;
+  }
+
+  .client-table thead {
+    display: none;
+  }
+
+  .client-table,
+  .client-table tbody,
+  .client-table tr,
+  .client-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .client-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    background: white;
+  }
+
+  .client-table td {
+    padding: 8px 0;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .client-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .client-table td:first-child::before {
+    content: "S.No";
+  }
+
+  .client-table td:nth-child(2)::before {
+    content: "Amount";
+  }
+
+  .client-table td:nth-child(3)::before {
+    content: "Status";
+  }
+
+  .client-table td:nth-child(4)::before {
+    content: "Payment Date";
+  }
+
+  .client-table td:last-child::before {
+    content: "Actions";
+  }
+
+  .client-mark-paid-btn {
+    width: fit-content;
+    margin-top: 8px;
+  }
+
+  /* Modal adjustments */
+  .payment-modal {
+    width: 100%;
+    max-width: calc(100% - 32px);
+    margin: 16px;
+  }
+
+  .better-modal {
+    padding: 20px !important;
+  }
+
+  .payment-modal-header h3 {
+    font-size: 18px;
+  }
+
+  .payment-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .payment-modal-actions button {
+    width: 100%;
+  }
+
+  .signature-pad {
+    height: 150px;
+  }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+/* ---------- SMALL TABLETS (641px - 768px) ---------- */
+@media (min-width: 641px) and (max-width: 768px) {
+  .client-section {
+    padding: 20px;
+  }
+
   .client-layout {
     flex-direction: column;
+    gap: 20px;
   }
+
   .client-sidebar {
     width: 100%;
     flex-direction: row;
     gap: 16px;
   }
+
   .client-card {
     flex: 1;
+    min-width: 0;
+  }
+
+  .client-property-header {
+    flex-wrap: wrap;
+  }
+
+  /* Table adjustments */
+  .client-table {
+    font-size: 13px;
+  }
+
+  .client-table th,
+  .client-table td {
+    padding: 10px 6px;
+  }
+}
+
+/* ---------- TABLETS (769px - 1024px) ---------- */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .client-section {
+    padding: 24px;
+  }
+
+  .client-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .client-sidebar {
+    width: 100%;
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .client-card {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .client-sale-box {
+    padding: 20px;
+  }
+}
+
+/* ---------- LARGE TABLETS / SMALL LAPTOPS (1025px - 1280px) ---------- */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .client-sidebar {
+    width: 350px;
+  }
+
+  .client-section {
+    padding: 24px;
+  }
+}
+
+/* ---------- DESKTOP (≥1281px) - OPTIMAL LAYOUT ---------- */
+@media (min-width: 1281px) {
+  .client-sidebar {
+    width: 400px;
+  }
+
+  .client-section {
+    padding: 28px;
+  }
+}
+
+/* ---------- PRINT STYLES ---------- */
+@media print {
+  .client-add-sale-btn,
+  .client-add-payment-btn,
+  .client-mark-paid-btn,
+  .payment-close-btn {
+    display: none;
+  }
+
+  .client-section {
+    padding: 0;
+  }
+
+  .client-card {
+    box-shadow: none;
+    page-break-inside: avoid;
   }
 }
