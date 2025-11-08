@@ -39,7 +39,8 @@ const AdminLayout = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post('/logout');
+      // Call server logout (verifyToken middleware will validate token)
+      await api.post('/admin/logout');
     } catch (err) {
       console.error('Logout API error:', err?.response?.data || err.message);
     } finally {
@@ -69,7 +70,8 @@ const AdminLayout = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         if (!userData || !userData.id) throw new Error('User data not found');
 
-        const response = await api.get(`/getUserById/${userData.id}`);
+        // fetch fresh admin data (includes role)
+        const response = await api.get(`/admin/getUserById/${userData.id}`);
         if (!mounted) return;
         setAdmin(response.data);
         localStorage.setItem(`user_${userData.id}`, JSON.stringify(response.data));

@@ -67,7 +67,7 @@ function ViewAdmin() {
     // ===========================================================
     const fetchClientInfo = async () => {
         try {
-            const res = await api.get(`/getUserById/${id}`);
+            const res = await api.get(`/admin/getUserById/${id}`);
             setClientInfo(res.data);
         } catch (error) {
             console.error("fetchClientInfo", error);

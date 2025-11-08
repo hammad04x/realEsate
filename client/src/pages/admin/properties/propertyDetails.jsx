@@ -1,7 +1,6 @@
 // client/src/pages/admin/properties/PropertyDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Sidebar from "../layout/Sidebar";
 import Navbar from "../layout/Navbar";
 import { IoChevronBackOutline, IoPencil } from "react-icons/io5";
@@ -41,9 +40,10 @@ const PropertyDetails = () => {
       if (!id) return setError("No property ID");
       setLoading(true);
       try {
-        const { data } = await axios.get(`http://localhost:4500/getproperty/${id}`);
-        setProperty(data);
-      } catch (e) {
+        const res = await api.get(`http://localhost:4500/getproperty/${id}`);
+        setProperty(res.data);
+      } catch (err) {
+        console.error("Failed to fetch property:", err);
         setError("Failed to load property");
       } finally {
         setLoading(false);
@@ -56,7 +56,7 @@ const PropertyDetails = () => {
     if (!property?.id) return;
     if (!window.confirm("Delete this property permanently?")) return;
     try {
-      await axios.delete(`http://localhost:4500/deleteproperty/${property.id}`);
+      await api.delete(`http://localhost:4500/deleteproperty/${property.id}`);
       alert("Property deleted");
       navigate("/admin/property");
     } catch (e) {

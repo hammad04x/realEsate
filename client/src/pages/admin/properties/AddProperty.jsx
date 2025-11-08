@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { MdSave } from "react-icons/md";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 
 const AddProperty = () => {
   const navigate = useNavigate();
@@ -47,8 +47,8 @@ const AddProperty = () => {
     Object.keys(form).forEach(key => fd.append(key, form[key]));
 
     try {
-      await axios.post("http://localhost:4500/addproperty", fd, {
-        headers: { "Content-Type": "multipart/form-data" }
+      await api.post("http://localhost:4500/addproperty", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Property added!");
       navigate("/admin/property");

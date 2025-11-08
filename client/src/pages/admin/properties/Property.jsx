@@ -8,6 +8,9 @@ import Breadcrumb from "../layout/Breadcrumb";
 import { IoPencil } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
 
+import "../../../assets/css/admin-card.css"; // keep your styles
+import api from "../../../api/axiosInstance";
+
 const GetProperties = () => {
   const [properties, setProperties] = useState([]);
   const [activeTab, setActiveTab] = useState("All");
@@ -18,12 +21,27 @@ const GetProperties = () => {
 
   const fetchProperties = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4500/getproperties");
-      setProperties(data || []);
+      const res = await api.get("http://localhost:4500/getproperties");
+      setProperties(res.data || []);
     } catch (err) {
       console.error(err);
       alert("Failed to load properties");
     }
+  };
+
+  const fetchAssignments = async () => {
+    try {
+      const res = await api.get("http://localhost:4500/getassignedproperties");
+      // if you need assignments later, store them; currently not used
+      // setAssignments(res.data || []);
+    } catch (err) {
+      console.error("fetchAssignments error", err);
+    }
+  };
+
+  // unified refresh that fetches both lists
+  const refreshAll = async () => {
+    await Promise.all([fetchProperties(), fetchAssignments()]);
   };
 
   useEffect(() => {
@@ -43,19 +61,25 @@ const GetProperties = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const toggleSidebar = () => setIsSidebarOpen(v => !v);
-
+  // Delete property
   const handleDelete = async (id, e) => {
-    e.stopPropagation();
-    if (!window.confirm("Delete this property permanently?")) return;
+    // stop propagation if called from row click
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+
+    if (!window.confirm("Are you sure you want to delete this property?")) return;
     try {
-      await axios.delete(`http://localhost:4500/deleteproperty/${id}`);
+      await api.delete(`http://localhost:4500/deleteproperty/${id}`);
       await fetchProperties();
-      alert("Deleted successfully");
+      alert("Property deleted successfully");
     } catch (err) {
-      alert("Failed to delete");
+      console.error("Delete error:", err);
+      alert("Failed to delete property");
     }
   };
+
+  const toggleSidebar = () => setIsSidebarOpen(v => !v);
+
+ 
 
   const openDetails = (p) => navigate(`/admin/property/${p.id}`, { state: { item: p } });
 

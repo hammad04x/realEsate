@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { MdSave } from "react-icons/md";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 
 const UpdateProperty = () => {
   const navigate = useNavigate();
@@ -58,8 +58,8 @@ const UpdateProperty = () => {
     });
 
     try {
-      await axios.put(`http://localhost:4500/updateproperty/${form.id}`, fd, {
-        headers: { "Content-Type": "multipart/form-data" }
+      await api.put(`http://localhost:4500/updateproperty/${form.id}`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Updated successfully!");
       navigate("/admin/property");
