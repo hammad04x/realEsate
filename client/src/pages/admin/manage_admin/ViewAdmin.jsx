@@ -11,8 +11,6 @@ function ViewAdmin() {
     const { id } = useParams(); // client id
 
     const admin_id = localStorage.getItem("admin_id")
-    console.log(id)
-    console.log(admin_id)
     const user = JSON.parse(localStorage.getItem("user"))
     const user_role = user.role
     const navigate = useNavigate();
@@ -55,7 +53,7 @@ function ViewAdmin() {
         details: "",
         payment_method: "",
         paid_at: "",
-        created_by:""
+        created_by: ""
     });
     const [paymenterror, setPaymentError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
@@ -136,7 +134,16 @@ function ViewAdmin() {
                     api.get(`${API_ROOT}/getproperties/${p.property_id}`)
                 );
                 const responses = await Promise.all(requests);
-                const formatted = responses.map((r) => r.data);
+                const formatted = responses.map((r, index) => {
+                    const prop = r.data;
+                    const assigned = propertId.find(x => x.property_id === prop.id);
+
+                    return {
+                        ...prop,
+                        assigned_amount: assigned?.amount || prop.price
+                    };
+                });
+
                 setPropertiesDetail(formatted);
             } catch (error) {
                 console.error("fetchPropertiesById", error);
@@ -202,7 +209,7 @@ function ViewAdmin() {
             details: "",
             payment_method: "",
             paid_at: "",
-            created_by:""
+            created_by: ""
         });
         setShowPaymentModal(true);
     };
@@ -539,7 +546,7 @@ function ViewAdmin() {
                                         <span className="client-property-date">{p.createdAt}</span>
                                     </div>
 
-                                    <p className="client-sale-price">₹{p.price}</p>
+                                    <p className="client-sale-price">₹{p.assigned_amount}</p>
                                     <div className="client-sale-plan">
                                         <p className="client-sale-note">{p.description}</p>
                                         {openProperty === p.id ? <FaChevronUp /> : <FaChevronDown />}
