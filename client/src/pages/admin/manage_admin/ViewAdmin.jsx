@@ -320,10 +320,7 @@ function ViewAdmin() {
             fd.append("confirmed_at", markConfirmedAt.replace("T", " ") || null);
             fd.append("reject_reason", rejectReason);
 
-            if (!sigCanvas.current.isEmpty()) {
-                const blob = await getSignatureBlob();
-                fd.append("signature", blob, `reject_${Date.now()}.png`);
-            }
+           
 
             await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -468,10 +465,12 @@ function ViewAdmin() {
                                                                     <td data-label="Actions" onClick={(e) => e.stopPropagation()}>
                                                                         {pay.status === "refunded" ? null : (
                                                                             pay.status === "completed" || pay.status === "rejected" ? (
-                                                                                pay.created_by == admin_id ? null : (
+                                                                                user_role === "admin"?   (
                                                                                     <button className="client-delete-btn" onClick={() => handleUpdatePaymentStatus(pay.id)}>
                                                                                         Delete
                                                                                     </button>
+                                                                                ):(
+                                                                                    <></>
                                                                                 )
                                                                             ) : (
                                                                                 pay.created_by == admin_id ? (
@@ -647,9 +646,9 @@ function ViewAdmin() {
                                         placeholder="Why are you rejecting this payment?"
                                     />
 
-                                    <label>Optional Signature (sign to confirm rejection)</label>
+                                    {/* <label>Optional Signature (sign to confirm rejection)</label>
                                     <SignaturePad ref={sigCanvas} penColor="black" canvasProps={{ className: "signature-pad" }} />
-                                    <button className="signature-clear-btn" onClick={() => sigCanvas.current.clear()}>Clear</button>
+                                    <button className="signature-clear-btn" onClick={() => sigCanvas.current.clear()}>Clear</button> */}
 
                                     <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
                                         <button className="payment-cancel" onClick={() => setShowRejectComment(false)}>Back</button>
