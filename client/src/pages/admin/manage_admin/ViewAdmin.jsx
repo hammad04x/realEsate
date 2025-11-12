@@ -84,7 +84,7 @@ function ViewAdmin() {
       setPropertId(res.data || []);
     } catch (error) {
       console.error("fetchClientAssignProperties", error);
-      toast.error("Failed to load assigned properties");
+      // toast.error("Failed to load assigned properties");
     }
   };
   const assignProperties = async () => {
