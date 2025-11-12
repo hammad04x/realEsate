@@ -7,7 +7,7 @@ const connection = mysql.createPool({
   database: 'realestate',
   waitForConnections: true, // Wait for a connection if all are in use
   connectionLimit: 10,      // Maximum number of connections in the pool
-  queueLimit: 0,            // Unlimited queued requests (0 means no limit)
+  queueLimit: 0,            // Unlimited queued requests (0 means no limit)r
 });
 
 // Optional: Test the pool by getting a connection

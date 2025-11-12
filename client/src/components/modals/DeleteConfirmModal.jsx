@@ -15,10 +15,10 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm }) => {
 
   const handleDelete = () => {
     if (inputCode.trim() === randomCode) {
-      toast.success("Code matched ✅");
+      toast.success("Code matched");
       onConfirm();
     } else {
-      toast.error("Wrong code ❌ — deletion cancelled");
+      toast.error("Wrong code");
     }
   };
 
@@ -26,56 +26,41 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm }) => {
 
   return (
     <div className="payment-modal-overlay">
-      <div className="payment-modal better-modal mark-paid-modal">
-        <div className="payment-modal-header">
-          <h3>Confirm Delete</h3>
-          <button className="payment-close-btn" onClick={onClose}>✕</button>
+      <div className="payment-modal">
+        <h3>Confirm Delete</h3>
+
+        <p>Enter this code to confirm:</p>
+
+        <div style={{
+          fontSize: "22px",
+          fontWeight: "bold",
+          background: "#eee",
+          padding: "8px",
+          textAlign: "center",
+          borderRadius: "6px",
+          letterSpacing: "4px",
+          marginBottom: "10px"
+        }}>
+          {randomCode}
         </div>
 
-        <div style={{ padding: 12 }}>
-          <p style={{ marginBottom: 8 }}>
-            To delete this payment, enter the verification code below 👇
-          </p>
+        <input
+          type="text"
+          value={inputCode}
+          onChange={(e) => setInputCode(e.target.value)}
+          placeholder="Enter code"
+          maxLength={4}
+          style={{
+            width: "100%",
+            padding: "8px",
+            textAlign: "center",
+            letterSpacing: "3px"
+          }}
+        />
 
-          <div
-            style={{
-              fontSize: "1.4rem",
-              fontWeight: "bold",
-              letterSpacing: "4px",
-              textAlign: "center",
-              background: "#f3f3f3",
-              borderRadius: "8px",
-              padding: "8px 0",
-              marginBottom: "10px",
-            }}
-          >
-            {randomCode}
-          </div>
-
-          <input
-            type="text"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-            placeholder="Enter the code here"
-            maxLength={4}
-            style={{
-              width: "100%",
-              padding: "8px",
-              border: "1px solid #ccc",
-              borderRadius: "6px",
-              marginBottom: "12px",
-              textAlign: "center",
-              fontSize: "1.1rem",
-              letterSpacing: "3px",
-            }}
-          />
-
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <button className="payment-cancel" onClick={onClose}>Cancel</button>
-            <button className="payment-save" onClick={handleDelete}>
-              Confirm Delete
-            </button>
-          </div>
+        <div style={{ marginTop: 12, display: "flex", justifyContent: "space-around", gap: 10 }}>
+          <button className="payment-cancel" onClick={onClose}>Cancel</button>
+          <button className="payment-save" onClick={handleDelete}>Confirm Delete</button>
         </div>
       </div>
     </div>
