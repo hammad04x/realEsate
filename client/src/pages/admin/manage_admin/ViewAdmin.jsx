@@ -344,7 +344,7 @@ function ViewAdmin() {
   const handleUpdatePaymentStatus = async (paymentId) => {
     if (!window.confirm("Delete this payment?")) return;
     try {
-      await api.put(`${API_ROOT}/updatePaymentStatus/${paymentId}`, { status: "refunded" });
+      await api.put(`${API_ROOT}/updatePaymentStatus/${paymentId}`, { status: "deleted" });
       alert("Payment deleted");
       await getClientPayments();
     } catch (error) {
@@ -472,7 +472,7 @@ function ViewAdmin() {
                                       backgroundColor:
                                         pay.status === "completed" ? "#22c55e" :
                                           pay.status === "rejected" ? "#ef4444" :
-                                            pay.status === "refunded" ? "#6b7280" :
+                                            pay.status === "deleted" ? "#6b7280" :
                                               "#f97316",
                                       color: pay.status === "pending" ? "black" : "white",
                                     }}
@@ -484,7 +484,7 @@ function ViewAdmin() {
                                   {pay.paid_at ? new Date(pay.paid_at).toLocaleDateString("en-IN") : "—"}
                                 </td>
                                 <td data-label="Actions" onClick={(e) => e.stopPropagation()}>
-                                  {pay.status === "refunded" ? null : (
+                                  {pay.status === "deleted" ? null : (
                                     pay.status === "completed" || pay.status === "rejected" ? (
                                       user_role === "admin" ? (
                                         <div style={{ display: "flex", gap: 6 }}>
@@ -498,15 +498,24 @@ function ViewAdmin() {
                                               <FaFileDownload />
                                             </button>
                                           )}
-                                          {/* Delete Button */}
                                           <button
                                             className="client-delete-btn"
                                             onClick={() => handleUpdatePaymentStatus(pay.id)}
                                           >
-                                            <FaTrashAlt/>
+                                            <FaTrashAlt />
                                           </button>
                                         </div>
-                                      ) : null
+                                      ) : (
+                                        pay.status === "completed" && (
+                                          <button
+                                            className="client-download-btn"
+                                            onClick={() => handleDownloadInvoice(pay.id)}
+                                            title="Download Invoice"
+                                          >
+                                            <FaFileDownload />
+                                          </button>
+                                        )
+                                      )
                                     ) : (
                                       pay.created_by == admin_id ? (
                                         <button className="client-edit-btn" onClick={(e) => handleEditPayment(e, pay)}>
