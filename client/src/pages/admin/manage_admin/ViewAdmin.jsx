@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DeleteConfirmModal from "../../../components/modals/DeleteConfirmModal";
+import InvoiceModal from "../../../components/invoice/InvoiceModal";
 
 function ViewAdmin() {
   const { id } = useParams();
@@ -395,23 +396,28 @@ function ViewAdmin() {
   };
 
   // Download invoice helper
-  const handleDownloadInvoice = async (paymentId) => {
-    try {
-      const { data } = await api.get(`${API_ROOT}/generateInvoice/${paymentId}`, {
-        responseType: "blob",
-      });
-      const url = window.URL.createObjectURL(new Blob([data], { type: "application/pdf" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `invoice_${paymentId}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success("Invoice downloaded");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to download invoice");
-    }
-  };
+ const handleDownloadInvoice = async (paymentId) => {
+  try {
+    const response = await api.get(`/downloadInvoice/${paymentId}`, {
+      responseType: "blob",
+    });
+
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `invoice_${paymentId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success("Invoice downloaded successfully");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to download invoice");
+  }
+};
+
+
+
 
   // ───────────────── RENDER ─────────────────
   return (
@@ -650,7 +656,7 @@ function ViewAdmin() {
       )}
 
       {/* MARK PAID / REJECT MODAL */}
-      {showMarkPaidModal && (
+      {/* {showMarkPaidModal && (
         <div className="payment-modal-overlay">
           <div className="payment-modal better-modal mark-paid-modal">
             <div className="payment-modal-header">
@@ -700,7 +706,19 @@ function ViewAdmin() {
             )}
           </div>
         </div>
+      )} */}
+
+      {showMarkPaidModal && selectedPayment && (
+        <InvoiceModal
+          payment={selectedPayment}
+          clientInfo={clientInfo}
+          property={selectedProperty}
+          adminId={admin_id}
+          onClose={() => setShowMarkPaidModal(false)}
+          refreshPayments={getClientPayments}
+        />
       )}
+
 
       {/* Payment delete confirmation modal */}
       <DeleteConfirmModal
