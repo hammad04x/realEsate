@@ -84,7 +84,6 @@ function ViewAdmin() {
       setPropertId(res.data || []);
     } catch (error) {
       console.error("fetchClientAssignProperties", error);
-      // toast.error("Failed to load assigned properties");
     }
   };
   const assignProperties = async () => {
@@ -100,7 +99,6 @@ function ViewAdmin() {
     try {
       const res = await api.get(`${API_ROOT}/getPaymentsByClientId/${id}`);
       setClientPayments(res.data || []);
-      // prefetch confirmations for all payments (optional)
       (res.data || []).forEach(pay => fetchConfirmationByPaymentId(pay.id));
     } catch (error) {
       console.error("getClientPayments", error);
@@ -363,6 +361,7 @@ function ViewAdmin() {
     setDeleteModalOpen(true);
   };
 
+  // ───────────────── UPDATED: DELETE WITH REASON REMOVAL ─────────────────
   const confirmDeletePayment = async () => {
     const paymentId = deleteTargetPaymentId;
     if (!paymentId) {
@@ -370,15 +369,32 @@ function ViewAdmin() {
       setDeleteModalOpen(false);
       return;
     }
+
     try {
+      // Step 1: Fetch and delete confirmation (rejection reason)
+      const confirmRes = await api.get(`${API_ROOT}/getConfirmationByPaymentId/${paymentId}`);
+      const confirmation = confirmRes.data?.[0];
+
+      if (confirmation) {
+        await api.delete(`${API_ROOT}/deletepaymentconfirmation/${confirmation.id}`);
+        // Remove from local state immediately
+        setConfirmationPayments(prev => {
+          const copy = { ...prev };
+          delete copy[paymentId];
+          return copy;
+        });
+      }
+
+      // Step 2: Mark payment as deleted
       await api.put(`${API_ROOT}/updatePaymentStatus/${paymentId}`, { status: "deleted" });
-      toast.success("Payment deleted");
+
+      toast.success("Payment and rejection reason deleted");
       setDeleteModalOpen(false);
       setDeleteTargetPaymentId(null);
-      await getClientPayments();
+      await getClientPayments(); // Refresh payments list
     } catch (error) {
-      console.error("Failed to delete payment", error);
-      toast.error("Failed to delete payment");
+      console.error("Failed to delete payment / confirmation", error);
+      toast.error("Could not delete payment. Try again.");
     }
   };
 
@@ -402,23 +418,49 @@ function ViewAdmin() {
   };
 
   // ───────────────── RENDER HELPERS ─────────────────
-  // render a reject row (boxed, scrollable if overflow)
-  const renderRejectRow = (pay) => {
+  const [expandedRejects, setExpandedRejects] = useState({});
+
+  const toggleRejectExpand = (paymentId) => {
+    setExpandedRejects(prev => ({
+      ...prev,
+      [paymentId]: !prev[paymentId]
+    }));
+  };
+
+  const renderRejectionRow = (pay) => {
     const confirm = confirmationPayments?.[pay.id];
     const reason = confirm?.reject_reason || confirm?.rejectReason || "";
-    if (!reason) return null;
+    if (!reason.trim()) return null;
+
+    const isExpanded = expandedRejects[pay.id];
 
     return (
-      <tr key={`reject-${pay.id}`} className="reject-row" onClick={(e) => e.stopPropagation()}>
-        <td colSpan={5} style={{ padding: 0, background: "transparent" }}>
-          <div className="reject-container" role="note" aria-live="polite">
-            <div className="reject-label">Rejection reason</div>
+      <tr className="reject-detail-row" key={`reject-${pay.id}`}>
+        <td colSpan={5} className="reject-cell">
+          <div className="reject-wrapper">
             <div
-              className="reject-text-box"
-              title={reason}
+              className="reject-content"
+              style={{
+                maxHeight: isExpanded ? 'none' : '40px',
+                overflow: 'hidden',
+                transition: 'max-height 0.3s ease'
+              }}
             >
-              {reason}
+              <span className="reject-label">Rejection Reason:</span>
+              <span className="reject-text">{reason}</span>
             </div>
+            {reason.length > 60 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleRejectExpand(pay.id);
+                }}
+                className="reject-toggle"
+                aria-label={isExpanded ? "Collapse" : "Expand"}
+              >
+                {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+              </button>
+            )}
           </div>
         </td>
       </tr>
@@ -518,55 +560,35 @@ function ViewAdmin() {
                         </thead>
                         <tbody>
                           {clientPayments.filter(pay => pay.property_id === p.id).length > 0 ? (
-                            clientPayments.filter(pay => pay.property_id === p.id).map((pay, idx) => {
-                              const confirm = confirmationPayments?.[pay.id];
-                              return (
-                                <React.Fragment key={`frag-${pay.id}`}>
-                                  <tr key={pay.id} onClick={() => fetchConfirmationByPaymentId(pay.id)}>
-                                    <td data-label="S.No">{idx + 1}</td>
-                                    <td data-label="Amount">₹{Number(pay.amount || 0).toLocaleString()}</td>
-                                    <td data-label="Status">
-                                      <span
-                                        className="client-badge"
-                                        style={{
-                                          backgroundColor:
-                                            pay.status === "completed" ? "#22c55e" :
-                                              pay.status === "rejected" ? "#ef4444" :
-                                                pay.status === "deleted" ? "#6b7280" :
-                                                  "#f97316",
-                                          color: pay.status === "pending" ? "black" : "white",
-                                        }}
-                                      >
-                                        {pay.status}
-                                      </span>
-                                    </td>
-                                    <td data-label="Payment Date">
-                                      {pay.paid_at ? new Date(pay.paid_at).toLocaleDateString("en-IN") : new Date().toLocaleDateString("en-IN")}
-                                    </td>
-                                    <td data-label="Actions" onClick={(e) => e.stopPropagation()}>
-                                      {pay.status === "deleted" ? null : (
-                                        pay.status === "completed" || pay.status === "rejected" ? (
-                                          user_role === "admin" ? (
-                                            <div style={{ display: "flex", gap: 6 }}>
-                                              {pay.status === "completed" && (
-                                                <button
-                                                  className="client-download-btn"
-                                                  onClick={() => handleDownloadInvoice(pay.id)}
-                                                  title="Download Invoice"
-                                                >
-                                                  <FaFileDownload />
-                                                </button>
-                                              )}
-                                              <button
-                                                className="client-delete-btn"
-                                                onClick={(e) => openDeleteModal(pay.id, e)}
-                                                title="Delete"
-                                              >
-                                                <FaTrashAlt />
-                                              </button>
-                                            </div>
-                                          ) : (
-                                            pay.status === "completed" && (
+                            clientPayments.filter(pay => pay.property_id === p.id).map((pay, idx) => (
+                              <React.Fragment key={pay.id}>
+                                <tr onClick={() => fetchConfirmationByPaymentId(pay.id)}>
+                                  <td data-label="S.No">{idx + 1}</td>
+                                  <td data-label="Amount">₹{Number(pay.amount || 0).toLocaleString()}</td>
+                                  <td data-label="Status">
+                                    <span
+                                      className="client-badge"
+                                      style={{
+                                        backgroundColor:
+                                          pay.status === "completed" ? "#22c55e" :
+                                            pay.status === "rejected" ? "#ef4444" :
+                                              pay.status === "deleted" ? "#6b7280" :
+                                                "#f97316",
+                                        color: pay.status === "pending" ? "black" : "white",
+                                      }}
+                                    >
+                                      {pay.status}
+                                    </span>
+                                  </td>
+                                  <td data-label="Payment Date">
+                                    {pay.paid_at ? new Date(pay.paid_at).toLocaleDateString("en-IN") : new Date().toLocaleDateString("en-IN")}
+                                  </td>
+                                  <td data-label="Actions" onClick={(e) => e.stopPropagation()}>
+                                    {pay.status === "deleted" ? null : (
+                                      pay.status === "completed" || pay.status === "rejected" ? (
+                                        user_role === "admin" ? (
+                                          <div style={{ display: "flex", gap: 6 }}>
+                                            {pay.status === "completed" && (
                                               <button
                                                 className="client-download-btn"
                                                 onClick={() => handleDownloadInvoice(pay.id)}
@@ -574,28 +596,45 @@ function ViewAdmin() {
                                               >
                                                 <FaFileDownload />
                                               </button>
-                                            )
-                                          )
-                                        ) : (
-                                          pay.created_by == admin_id ? (
-                                            <button className="client-edit-btn" onClick={(e) => handleEditPayment(e, pay)}>
-                                              Edit
+                                            )}
+                                            <button
+                                              className="client-delete-btn"
+                                              onClick={(e) => openDeleteModal(pay.id, e)}
+                                              title="Delete"
+                                            >
+                                              <FaTrashAlt />
                                             </button>
-                                          ) : (
-                                            <button className="client-mark-paid-btn" onClick={(e) => openMarkPaidForPayment(e, pay)}>
-                                              Mark Paid
+                                          </div>
+                                        ) : (
+                                          pay.status === "completed" && (
+                                            <button
+                                              className="client-download-btn"
+                                              onClick={() => handleDownloadInvoice(pay.id)}
+                                              title="Download Invoice"
+                                            >
+                                              <FaFileDownload />
                                             </button>
                                           )
                                         )
-                                      )}
-                                    </td>
-                                  </tr>
+                                      ) : (
+                                        pay.created_by == admin_id ? (
+                                          <button className="client-edit-btn" onClick={(e) => handleEditPayment(e, pay)}>
+                                            Edit
+                                          </button>
+                                        ) : (
+                                          <button className="client-mark-paid-btn" onClick={(e) => openMarkPaidForPayment(e, pay)}>
+                                            Mark Paid
+                                          </button>
+                                        )
+                                      )
+                                    )}
+                                  </td>
+                                </tr>
 
-                                  {/* Reject reason row (boxed) */}
-                                  {renderRejectRow(pay)}
-                                </React.Fragment>
-                              );
-                            })
+                                {/* Rejection Reason Row */}
+                                {renderRejectionRow(pay)}
+                              </React.Fragment>
+                            ))
                           ) : (
                             <tr><td colSpan={5} className="empty-state">No payments for this property</td></tr>
                           )}
