@@ -34,6 +34,7 @@ const ManageAdmin = () => {
       try {
         const res = await api.get("/admin/clients");
         setAdmins(res.data || []);
+        console.log(res.data)
       } catch (error) {
         console.error(error);
         toast.error("Failed to load admins");
@@ -59,8 +60,13 @@ const ManageAdmin = () => {
   }, []);
 
   const filtered = admins.filter((a) =>
-    activeTab === "All" ? true : activeTab === "Active" ? a.status === "active" : a.status === "block"
+    activeTab === "All"
+      ? a.trash === "0" // only non-deleted users
+      : activeTab === "Trash"
+        ? a.trash === "1" // only trashed users
+        : true
   );
+
 
   const toggleSidebar = () => setIsSidebarOpen((v) => !v);
 
@@ -98,16 +104,16 @@ const ManageAdmin = () => {
   };
 
 
- const handleTrashClient = async (id) => {
-  try {
-    const res = await api.put(`/admin/trash-client/${id}`,{trash:'1'});
-    alert("done")
-    // refresh list or remove item from state
-  } catch (err) {
-    console.error("trash client error", err);
-    alert("Failed to trash client");
-  }
-};
+  const handleTrashClient = async (id) => {
+    try {
+      const res = await api.put(`/admin/trash-client/${id}`, { trash: '1' });
+      alert("done")
+      // refresh list or remove item from state
+    } catch (err) {
+      console.error("trash client error", err);
+      alert("Failed to trash client");
+    }
+  };
 
 
   // show detail modal for desktop
@@ -137,16 +143,21 @@ const ManageAdmin = () => {
         />
 
         <div className="admin-panel-header-tabs">
-          <button className={`admin-panel-header-tab ${activeTab === "All" ? "active" : ""}`} onClick={() => setActiveTab("All")}>
+          <button
+            className={`admin-panel-header-tab ${activeTab === "All" ? "active" : ""}`}
+            onClick={() => setActiveTab("All")}
+          >
             All
           </button>
-          <button className={`admin-panel-header-tab ${activeTab === "Active" ? "active" : ""}`} onClick={() => setActiveTab("Active")}>
-            Active
-          </button>
-          <button className={`admin-panel-header-tab ${activeTab === "Blocked" ? "active" : ""}`} onClick={() => setActiveTab("Blocked")}>
-            Blocked
+
+          <button
+            className={`admin-panel-header-tab ${activeTab === "Trash" ? "active" : ""}`}
+            onClick={() => setActiveTab("Trash")}
+          >
+            Trash
           </button>
         </div>
+
 
         {/* Desktop Table */}
         {!isMobile && !isTablet && (

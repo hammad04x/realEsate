@@ -3,34 +3,41 @@ const connection = require('../../connection/connection');
 const { generateAccessToken } = require('../../utils/jwtUtils');
 
 const login = (req, res) => {
-
   const { identifier, password } = req.body;
-
-  const ip = req.ip || '127.0.0.1';
-  const userAgent = req.headers['user-agent'] || '';
+  const ip = req.ip || "127.0.0.1";
+  const userAgent = req.headers["user-agent"] || "";
 
   if (!identifier || !password) {
-    return res.status(400).json({ error: 'Identifier and password are required' });
+    return res.status(400).json({ error: "Identifier and password are required" });
   }
 
-  const sql = 'SELECT * FROM admin WHERE email = ? OR number = ? ';
+  // ✅ only non-trashed users allowed
+  const sql = `
+    SELECT * 
+    FROM admin 
+    WHERE (email = ? OR number = ?) 
+      AND trash = '0'
+  `;
+
   connection.query(sql, [identifier, identifier], async (err, results) => {
     if (err) {
-      return res.status(500).json({ error: 'Database error' });
+      console.error("DB error:", err);
+      return res.status(500).json({ error: "Database error" });
     }
-    if (results.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+
+    if (!results.length) {
+      return res.status(401).json({ error: "Invalid credentials or account disabled" });
     }
 
     const admin = results[0];
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Invalidate previous active tokens for this admin (single-session behavior)
+    // invalidate old tokens
     connection.query(
-      'UPDATE active_tokens SET is_blacklisted = 1 WHERE admin_id = ? AND is_blacklisted = 0',
+      "UPDATE active_tokens SET is_blacklisted = 1 WHERE admin_id = ? AND is_blacklisted = 0",
       [admin.id]
     );
 
@@ -39,28 +46,31 @@ const login = (req, res) => {
     const expires = new Date(now.getTime() + 120 * 60 * 1000);
 
     connection.query(
-      'INSERT INTO active_tokens (token_id, admin_id, ip_address, user_agent, issued_at, last_activity, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      "INSERT INTO active_tokens (token_id, admin_id, ip_address, user_agent, issued_at, last_activity, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [jti, admin.id, ip, userAgent, now, now, expires],
       (err) => {
         if (err) {
-          return res.status(500).json({ error: 'Failed to create session' });
+          console.error("Token insert error:", err);
+          return res.status(500).json({ error: "Failed to create session" });
         }
-        // Return the role too so frontend can adapt UI
+
         res.json({
           accessToken,
           admin: {
             id: admin.id,
             name: admin.name,
             email: admin.email,
-            role: admin.role || 'client', // default fallback
+            role: admin.role || "client",
             status: admin.status,
-            img: admin.img || null
-          }
+            img: admin.img || null,
+          },
         });
       }
     );
   });
 };
+
+
 
 const refreshToken = (req, res) => {
   const decoded = req.admin; // verifyToken now attaches decoded token
@@ -69,7 +79,7 @@ const refreshToken = (req, res) => {
   const userAgent = req.headers['user-agent'] || '';
 
   connection.query(
-    'SELECT * FROM active_tokens WHERE token_id = ? AND admin_id = ? AND is_blacklisted = 0',
+    `SELECT * FROM active_tokens WHERE token_id = ? AND admin_id = ? AND is_blacklisted = '0'`,
     [jti, adminId],
     (err, results) => {
       if (err) return res.status(500).json({ error: 'Database error' });
@@ -195,7 +205,7 @@ const addClient = async (req, res) => {
 
 const getClient = (req, res) => {
   connection.query(
-    "SELECT id, name, email, number, img ,status, createdat FROM admin WHERE role='client'",
+    "SELECT id, name, email, number, img ,status,trash, createdat FROM admin WHERE role='client'",
     (err, results) => {
       if (err) return res.status(500).json({ error: 'DB Error' });
       res.json(results);
