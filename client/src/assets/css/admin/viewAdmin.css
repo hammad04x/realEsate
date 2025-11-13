@@ -364,3 +364,86 @@ label { font-weight: 600; color: #475569; font-size: 14px; margin-bottom: 4px; d
     grid-column-start:auto;
   }
 }
+
+
+/* ──────────────────────────────────────────────────────────────
+   VIEW ADMIN - REJECTION ROW (NEW FULL-WIDTH ROW)
+   ────────────────────────────────────────────────────────────── */
+
+.reject-detail-row {
+  background: #fef2f2 !important;
+}
+
+.reject-detail-row td {
+  padding: 0 !important;
+  border: none;
+}
+
+.reject-cell {
+  padding: 12px 16px !important;
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+}
+
+.reject-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 5px;
+    border: #f7b6b6 dashed;
+    border-radius: 5px;
+}
+
+.reject-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.reject-label {
+  font-weight: 700;
+  color: #991b1b;
+  margin-right: 6px;
+}
+
+.reject-text {
+  color: #581c1c;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.reject-toggle {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.reject-toggle:hover {
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .reject-wrapper {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .reject-toggle {
+    align-self: flex-end;
+  }
+  .reject-cell {
+    padding: 10px 12px !important;
+  }
+}
